@@ -1,0 +1,319 @@
+---
+title: "Analysis Report"
+author: "MG"
+date: "Modified: `r Sys.Date()`"
+output: 
+#  bookdown::pdf_book: default
+  bookdown::html_document2: default
+bibliography: ["ref.bib"]
+csl: ieee.csl
+natbiboptions: round
+link-citations: TRUE
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+# for not outputting echo
+knitr::opts_chunk$set(echo = FALSE, results='hide', message=FALSE, warning=FALSE)
+
+# --------------------------------
+# libraries
+# --------------------------------
+library(readr)
+library(dplyr)
+library(tidyverse)
+
+
+# --------------------------------
+# constants
+# --------------------------------
+# original resorts
+PATH_RESORTS_ORG="../input/mg_resorts.csv"
+PATH_SNOW="../input/mg_snow.csv"
+
+# processed file
+PATH_RESORTS="../input/mg_resorts_gs.csv"
+
+# most intense color 
+MOST_INTENSE_COLOR="#132B43"  # dark blue
+LEAST_INTENSE_COLOR="#56B1F7" # light blue
+
+# functions and library loads
+
+# Compute the percentage
+# @param value Value to be presented as percentage
+# @param digi What precision, how many digits after decimal point
+# @return rounded value with digi digits after decimal point
+percentage <- function(value, digi) {
+  round(value*100, digits = digi)
+}
+```
+
+# Business Task Statement
+
+The purpose of this study is to build a dashbard to help skiers find their ideal
+destination for the next winter season. The dashboard should allow for 
+exploration and interactivity.
+
+The original dataset includes details on 499 ski resorts around the world 
+(location, slopes, lifts, prices, and ski season). There is also 
+a table with the snow cover around the world for each month of 2022 by
+latitude and longitude. It contains two data tables in CSV format and
+description of fields.
+
+```{r}
+# read the csv file
+dforg <- read_csv(PATH_RESORTS_ORG)
+df <- read_csv(PATH_RESORTS)
+df_snow <- read_csv(PATH_SNOW)
+```
+
+# Deliverables
+
+The dashboard in Shiny.
+<!-- ```{r, results='markup'} -->
+
+
+# Data
+
+The original data is located at [@maven_ski_resorts]. The data is
+organized in two .csv files:
+
+-   `mg_data_dictionary.csv` - the description of fields.
+-   `mg_resorts.csv` - the actual data (original data)
+-   `mg_resorts_gs.csv` - the processed file
+-   `mg_snow.csv` - snow cover for selected GPS locations for the entire 2022 year.
+
+It is not specified which year the resorts data regards. However, I expect that 
+it covers 2022 year. In addition, [@maven_ski_resorts] states that 
+the data source is [https://ski-resort-stats.com](https://ski-resort-stats.com) and NASA Earth Observations [@ski_resorts_source]
+with License *Public Domain*.
+
+##  mg_resorts.csv and mg_resorts_gs.csv
+
+File | Data Structure | No. of Fields | No. of Records | Date Added |
+|:--:|:--------------:|:-------------:|:--------------:|:----------:|
+mg_resorts.csv |  Table |       `r ncol(dforg)`      | `r nrow(dforg)`            | 02/07/2023 |
+mg_resorts_gs.csv |  Table |       `r ncol(df)`      | `r nrow(df)`            | 02/07/2023 |
+
+After data examination, it occurred that there are duplicates (explained
+later). I also reorganized fields for seasons, splitted seasons
+to months, added the field 'Seasons number' indicating the number
+of seasons shown in the original file. I added the numerical columns 
+corresponding to last four fields with 'Yes' 'No' answers (there were
+no other answers).
+
+For analysis I use the `r PATH_RESORTS` file.
+
+
+## Data Structure
+
+The description of main fields is in `mg_data_dictionary.csv`:
+
+For the `r PATH_RESORTS` file.
+
+Name | Description | Notes |
+|:--|:--------------|:-----------------|
+| ID | Identifier for each resort | |
+| Resort | Name of the ski and snowboard resort | |
+| Country | Resort country location | Unique countries:  `r length(unique(df$Country))` |
+| Continent | Resort continent location | Unique continents: `r length(unique(df$Continent))` |
+| Price | Ski pass cost for 1 adult for 1 day in the main season in Euro | Season | Normal start and end of the ski season (weather permits) | |
+| Months | 0 indicates a resort is closed, 1 the resort is open | |
+| Highest point	| Highest mountain point  in meters | |
+| Lowest point	| Lowest possible point to ski in meters | |
+| Beginner slopes |	Total length of "children", "blue", and "green" slopes in km | |
+|Intermediate slopes | Total length of "red" slopes in km | |
+| Difficult slopes	| Total length of "black", "advanced", and "expert" slopes in km |
+| Total slopes|	Total length of slopes in km | |
+| Longest run	| Longest possible continuous run in km | |
+| Snow cannons |	Total amount of snow cannons | |
+| Surface lifts |	Total number of surface lifts, including T-bar, Sunkidslift, Rope lifts and people mover | |
+| Chair lifts	| Total number of chair lifts | |
+| Gondola lifts	| Total number of gondola lifts, including Gondola, Train lifts, Funicular, Combined gondola and chairlifts, Helicopter lifts, Snowcats and Aerial tramways | |
+| Total lifts	| Total number of lifts | |
+|	Lift capacity |	Number of passengers the resort's lift system can move in an hour | |
+| Child friendly Org	| Is the ski resort child friendly? | Categorical |
+| Child friendly | Is the ski resort child friendly? | 0 - means 'no', 1 - means 'yes' |
+| Snowparks	Org| Does the resort have one or more snowparks? | Categorical |
+| Snowparks	| Does the resort have one or more snowparks? | 0 - means 'no', 1 - means 'yes'  |
+|	Nightskiing	Org| Does the resort offer skiing on illuminated slopes? | 0 - means 'no', 1 - means 'yes' |
+|	Summer skiing	Org | Does the resort offer skiing during the summer? | Categorical |
+|	Summer skiing	| Does the resort offer skiing during the summer? | 0 - means 'no', 1 - means 'yes' | |
+
+Processed file `r PATH_RESORTS` summary
+```{r, results='markup'}
+summary(df)
+```
+
+<!-- If you want to make it visible despite was globally defined
+```{r , results='markup'}
+summary(dforg)
+```
+-->
+
+
+There is a file `mg_snow.csv` that contains data regarding snow cover for selected GPS locations for the entire 2022 year.
+
+Name | Description | Notes |
+|:--|:--------------|-----------------|
+| Month |	Date to represent the month of the year (not just the first day) | |
+| Latitude	| Latitude at the center of the region (every "region" is 0.25x0.25 degrees in size) | |
+| Longitude	| Longitude at the center of the region (every "region" is 0.25x0.25 degrees in size) | |
+| Snow	| Percent of time the region was covered in snow during the month | |
+
+Processed file `r PATH_SNOW` summary
+```{r, results='markup'}
+summary(df_snow)
+```
+
+# Data Processing
+
+
+## Data Cleaning
+
+I used mainly Google Sheets for data cleaning. The number of records is 480
+and it was not an issue to process it. I used among others VLOOKUP, Data Cleanup
+
+### Duplicates
+
+- The below records have all fields the same values, including latitude
+  and longitude. I removed 143, 145, and 146, and renamed the resort
+  field in ID=140 to "4 Vallees (Verbier, Nendaz, Thyon, Veysonnaz)".
+
+| ID | Resort |
+|:--:|:-------|
+| 140 |	Verbier (4 Vallees) |
+| 143	| Nendaz (4 Vallees)  |
+| 145	| Thyon (4 Vallees)   |
+| 146	| Veysonnaz (4 Vallees) |
+
+- Records: ID=15 and ID=134 have the same values, including country and
+  longitude and latitude. Interestingly, although Cervinia is in Italy
+  the country record shows Switzerland so I assumed the record ID=15 
+  should remain
+
+15	Zermatt - Matterhorn
+134	Cervinia
+
+- Records: ID=104 and 111, have the same field values apart from
+  ID, Resort, and Longest Run (Anton - 10, Lech - 6, which roughly
+  is what I can find on-line: 11km and 4.5km, respectively. 
+  However, the total number of lifts for Lech is 34, for Anton is 38, 
+  and for Warth-Schroecken is 15, 
+  which gives total 87 as of Mar 17, 2023. So I assume the data 
+  regards a single place Ski Arlberg that includes (Anton, Lech, and
+  Warth-Schroecken). I remove ID=11, and rename St. Anton to 
+  Ski Arlberg (St Anton and Lech)
+  
+  Also combining 120 and 123 records (Zurs, and St. Christoph)
+  
+|  ID |	Resort | Longest Run |
+|:--:|:--:|:--:|
+| 104 |	St. Anton (Ski Arlberg) | 10 |
+| 111	| Lech (Ski Arlberg) | 6 |
+
+
+- Records: ID=20 and 32 have many the same field values, the name is
+  just reverted. The resort is in France (not in Italy as in record ID=32) and the longest run in record ID=32 is 0. I removed ID=32.
+
+- Records: ID 19, 61, 62 seems to have many same values, so I 
+  leave only one 
+- Records: ID 66, 67, 69, 74, 149, 150 have very same values, only
+  only 66 has the longest run > 0, so I leave it:
+  
+  Les 3 Vallees: Courchevel, Saint Martin de Belleville, La Tania-Val Thorens/Les Menuires/Meribel, Val Thorens, Meribel,
+Les Menuires
+
+- Records: ID 38, 72, and 133, seems values are same so inferring that the records have combined stats. Rec. 72 longest run has 0, so removing it.
+
+- Records: 106 and 148 combined into 106 (148 removed)
+- 118, 121 combined - record 121 removed.
+
+
+### Resort
+
+I used GoogleSheets to deal with special characters. It seems that it is in Windows-1252 or Latin-1 encoding. I removed question marks. 
+
+### Country
+
+- 38 unique values
+
+|  Country | No. of Resorts |
+|:--:|:--:|
+| Austria | 84  |
+| USA | 78 |
+| France	| 73  |
+| Switzerland | 55 |
+| Italy | 42 |
+
+### Continent
+
+- 5 unique values
+
+|  Continent | No. of Resorts |
+|:--:|:--:|
+| Europe | 341  |
+| North America	| 98  |
+| Asia | 24 |
+| Oceania | 10 |
+| South America | 7 |
+
+### Price
+
+The below records have price = 0.
+
+|  ID | Resort  | Continent | 
+|:--:|:--:|:--:|
+| 196	| Perisher | Oceania |
+| 235 | Yellowstone Club | North America |
+| 335 |	Pragelato | Europe |
+| 349	| Uludag-Bursa | Asia |
+| 369	| Palandoken-Ejder 3200 World Ski Center- | Asia |
+| 387	| High1 Resort | Asia |
+| 390	| Alpika Service | Europe |
+| 475	| Sun Mountain-Yabuli | Asia |
+| 495	| Puigmal | Europe |
+
+
+### Season
+
+The season field can have a single range, two ranges, three ranges,  unknown or year-around value. A single range can be a single month like "April" or "December-April". Two and three month ranges does not include a single month. There are two three seasons value: "December - April, June - August, October - November", and "October - November, December - May, June - October." The second one accounts for the entire year. I transformed it with VLOOKUP and marked each month whether it is in season. If there are no gaps, 
+i.e., no bordering '0' then the information about when the season starts and 
+ends is lost (i.e., where there is continuity of '1'). 
+I can add a field a number of seasons, though.
+
+### Latitude and Longitude
+
+The min latitude in [0; `r min(df$Latitude[df$Latitude >= 0])` ] = `r min(df$Latitude[df$Latitude >= 0])`  and the max
+latitude in [`r max(df$Latitude[df$Latitude < 0])`, 0) = 
+`r max(df$Latitude[df$Latitude < 0])`.
+
+## Missing Values
+Surprisingly there were no missing values.
+
+## White Spaces
+I checked with Google Sheets there are no white spaces.
+
+# Data Credibility
+
+The data is provided by a respected website devoted to Data Analytics
+[@maven_ski_resorts]. 
+
+# Data Bias
+
+My assumption is that the data is collected and presented in a fair manner.
+
+# License
+
+According to [@maven_ski_resorts] the license is *Public Domain*.
+
+# Future Work
+
+I have not used the data related to the snow cover. Including viz and
+info regarding the snow cover for resorts of interest could be valuable
+for ski trip planners.
+
+# References

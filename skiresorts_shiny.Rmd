@@ -1,0 +1,52 @@
+---
+title: "Ski Resorts"
+author: "MG"
+date: "`r Sys.Date()`"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+# path to data
+PATH_RESORTS="wksp/input/mg_resorts_gs.csv"
+# snow cover
+PATH_SNOW="wksp/input/mg_snow.csv"
+
+# most intense color 
+MOST_INTENSE_COLOR="#132B43"  # dark blue
+LEAST_INTENSE_COLOR="#56B1F7" # light blue
+
+# functions and library loads
+library(leaflet)
+library(dplyr)
+library(tidyverse)
+library(DT)
+# for htmlEscape() in labels
+library(htmltools)
+
+
+# Compute the percentage
+# @param value Value to be presented as percentage
+# @param digi What precision, how many digits after decimal point
+# @return rounded value with digi digits after decimal point
+percentage <- function(value, digi) {
+  round(value*100, digits = digi)
+}
+
+
+# load data in 'global' chunk so it can be shared by all users of the dashboard
+
+#df <- readr::read_csv(PATH_RESORTS)
+#df_snow <- readr::read_csv(PATH_SNOW)
+
+```
+
+## Which Ski Resort Would You Like To Visit?
+```{r tabsets, echo=FALSE}
+shinyAppDir("ski_resorts",
+  options = list(width = "100%", height = 550)
+)
+```
