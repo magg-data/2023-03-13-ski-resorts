@@ -1,2 +1,3 @@
-The files should be updated whenever ../input files are updated. This is requirement for the
-shiny package.
+mg_snow.csv - original data
+mg_resorts.csv - original data
+mg_resorts_gs.csv - data processed

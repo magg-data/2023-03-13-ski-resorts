@@ -3,8 +3,8 @@ title: "Analysis Report"
 author: "MG"
 date: "Modified: `r Sys.Date()`"
 output: 
-#  bookdown::pdf_book: default
-  bookdown::html_document2: default
+# bookdown::pdf_book: default
+bookdown::html_document2: default
 bibliography: ["ref.bib"]
 csl: ieee.csl
 natbiboptions: round
@@ -30,15 +30,12 @@ library(tidyverse)
 # constants
 # --------------------------------
 # original resorts
-PATH_RESORTS_ORG="../input/mg_resorts.csv"
-PATH_SNOW="../input/mg_snow.csv"
+PATH_RESORTS_ORG="input/mg_resorts.csv"
+PATH_SNOW="input/mg_snow.csv"
 
 # processed file
-PATH_RESORTS="../input/mg_resorts_gs.csv"
+PATH_RESORTS="input/mg_resorts_gs.csv"
 
-# most intense color 
-MOST_INTENSE_COLOR="#132B43"  # dark blue
-LEAST_INTENSE_COLOR="#56B1F7" # light blue
 
 # functions and library loads
 

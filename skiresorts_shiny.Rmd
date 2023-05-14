@@ -11,13 +11,9 @@ runtime: shiny
 knitr::opts_chunk$set(echo = TRUE)
 
 # path to data
-PATH_RESORTS="wksp/input/mg_resorts_gs.csv"
+PATH_RESORTS="input/mg_resorts_gs.csv"
 # snow cover
-PATH_SNOW="wksp/input/mg_snow.csv"
-
-# most intense color 
-MOST_INTENSE_COLOR="#132B43"  # dark blue
-LEAST_INTENSE_COLOR="#56B1F7" # light blue
+PATH_SNOW="input/mg_snow.csv"
 
 # functions and library loads
 library(leaflet)
