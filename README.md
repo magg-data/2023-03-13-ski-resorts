@@ -12,5 +12,6 @@ The dashboard was implemented in R Shiny.
 # Files
 
 - `report.Rmd` (`report.html`, `report.pdf`) Describe the data, how the data was cleaned and processed.
-- `skiresorts_shiny.Rmd` and `folder ski_resorts` implement my Shiny dashboard
+- `skiresorts_shiny.Rmd` and `folder ski_resorts` implement my Shiny dashboard.
 - Folder `input` contains data files.
+- Folder `screenshots` contains a few screenshot from the running dashboard.
